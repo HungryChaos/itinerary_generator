@@ -1,0 +1,21 @@
+{
+  "name": "multi-agent-ai-system",
+  "version": "1.0.0",
+  "description": "A simple multi-agent AI system that simulates interactions between agents in a defined environment.",
+  "main": "src/main.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.5.0",
+    "ts-node": "^10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/multi-agent-ai-system.git"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
