@@ -8,15 +8,20 @@ This project implements a simple multi-agent AI system where individual agents i
 multi-agent-ai-system
 ├── src
 │   ├── agents
-│   │   └── index.ts        # Contains the Agent class
+│   │   ├── query_parser.py    # Contains the Agent class for query parsing
+│   │   ├── attractions.py     # Agent for finding attractions
+│   │   ├── budget_manager.py  # Agent for budget management
+│   │   ├── itinerary_builder.py # Agent for building itineraries
 │   ├── environment
-│   │   └── index.ts        # Contains the Environment class
+│   │   └── environment.py     # Contains the Environment class
+│   ├── services
+│   │   ├── amadeus_service.py # Amadeus API service for flights/hotels
+│   │   └── opentripmap.py     # OpenTripMap API service for attractions
 │   ├── utils
-│   │   └── index.ts        # Contains utility functions
-│   └── main.ts             # Entry point of the application
-├── package.json             # npm configuration file
-├── tsconfig.json            # TypeScript configuration file
-└── README.md                # Project documentation
+│   │   └── utils.py           # Contains utility functions
+│   └── main.py                # Entry point of the application
+├── requirements.txt           # Python dependencies
+└── README.md                  # Project documentation
 ```
 
 ## Installation
@@ -24,7 +29,7 @@ multi-agent-ai-system
 To install the necessary dependencies, run:
 
 ```
-npm install
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -32,7 +37,7 @@ npm install
 To run the simulation, execute the following command:
 
 ```
-npm start
+python src/main.py
 ```
 
 ## Classes and Functions

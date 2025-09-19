@@ -21,12 +21,15 @@ genai.configure(api_key=API_KEY)
 # Pydantic schema for structured output
 # --------------------
 class TripQuery(BaseModel):
+    origin: Optional[str] = None  # Starting location (e.g., city or airport code)
     destination: str
     start_date: Optional[str] = None   # ISO format: YYYY-MM-DD
     end_date: Optional[str] = None
     budget: Optional[float] = None
     currency: Optional[str] = "INR"
-    preferences: List[str] = []
+    trip_type: Optional[str] = "round-trip"  # one-way or round-trip
+    travelers: Optional[int] = 1
+    preferences: Optional[List[str]] = []  # e.g., ["food", "culture"]
 
 
 # --------------------
@@ -40,15 +43,25 @@ def parse_trip_request(user_input: str) -> TripQuery:
     system_prompt = f"""
     You are a travel assistant that extracts structured JSON from natural language trip requests.
     Always return ONLY valid JSON (no text before or after).
-    Keys required: destination (string), start_date (YYYY-MM-DD if possible), end_date (YYYY-MM-DD if possible),
-    budget (number), currency (3-letter code or INR if not specified), preferences (list of strings).
+    
+    Required keys:
+    - destination (string)
+    - start_date (YYYY-MM-DD if possible)
+    - end_date (YYYY-MM-DD if possible)
+    - budget (number, in currency units)
+    - currency (3-letter code, default "INR" if not given)
+    - preferences (list of strings, like ["food", "culture"])
+    - trip_type ("one-way" or "round-trip")
+    
+    Rules:
+    - If the user specifies both a start and end date, assume "round-trip".
+    - If the user only specifies a start date or explicitly says "one-way", set trip_type="one-way".
+    - If unsure, default to "round-trip".
     """
 
-    # Ask Gemini
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content([system_prompt, user_input])
 
-    # Try to parse JSON
     raw_text = response.text.strip()
     try:
         parsed = json.loads(raw_text)
@@ -61,7 +74,7 @@ def parse_trip_request(user_input: str) -> TripQuery:
 # Test locally
 # --------------------
 if __name__ == "__main__":
-    test_input = "Plan me a 5-day Japan trip under ₹80,000 focused on food & culture."
+    test_input = "Plan me a one-way flight from Delhi to London on 10th October under ₹60,000."
     result = parse_trip_request(test_input)
     print("✅ Parsed Trip Query:")
     print(result.json(indent=2))
