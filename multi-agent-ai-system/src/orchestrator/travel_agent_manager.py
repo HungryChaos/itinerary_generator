@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # allow imports
 
 from agents.query_parser import parse_trip_request
 from agents.flight_agent import search_flights
-from agents.hotel_agent import search_hotels
+from agents.hotel_agent import HotelAgent
 from agents.attractions_agent import search_attractions
 
 import google.generativeai as genai
@@ -40,8 +40,15 @@ def generate_itinerary_with_gemini(destination, start_date, end_date, flight, ho
     """
 
     response = model.generate_content(system_prompt)
+    text = response.text.strip()
+    # Clean Gemini response (remove markdown if present)
+    if text.startswith("```json"):
+        text = text[7:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
     try:
-        return json.loads(response.text.strip())
+        return json.loads(text)
     except json.JSONDecodeError:
         return {"error": "Failed to parse itinerary", "raw": response.text}
 
@@ -49,7 +56,7 @@ def generate_itinerary_with_gemini(destination, start_date, end_date, flight, ho
 def run_travel_planner(user_input: str):
     print("📝 Parsing user request...")
     trip = parse_trip_request(user_input)
-    print("✅ Parsed Trip:", trip.json(indent=2))
+    print("✅ Parsed Trip:", trip.model_dump_json(indent=2))
 
     # Flights
     print("\n✈️ Searching flights...")
@@ -64,7 +71,8 @@ def run_travel_planner(user_input: str):
 
     # Hotels
     print("\n🏨 Searching hotels...")
-    hotels = search_hotels(trip.destination, trip.start_date, trip.end_date, adults=trip.travelers or 1)
+    hotel_agent = HotelAgent()
+    hotels = hotel_agent.get_hotels(trip, max_results=5)
     if not hotels:
         print("❌ No hotels found.")
         return None
@@ -86,7 +94,7 @@ def run_travel_planner(user_input: str):
     )
 
     return {
-        "trip": trip.dict(),
+        "trip": trip.model_dump(),
         "flight": chosen_flight,
         "hotel": chosen_hotel,
         "attractions": attractions[:5],
@@ -95,7 +103,7 @@ def run_travel_planner(user_input: str):
 
 
 if __name__ == "__main__":
-    user_prompt = "Plan me a 5-day trip from Delhi to Japan under ₹80,000 focused on food & culture."
+    user_prompt = "Plan me a 5-day trip from New York to paris starting on 2025-10-01 under $5000 focused on food & culture for 2 travelers."
     result = run_travel_planner(user_prompt)
 
     if result:

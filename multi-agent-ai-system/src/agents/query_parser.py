@@ -5,9 +5,7 @@ from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-# --------------------
 # Load API key from .env
-# --------------------
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -39,12 +37,13 @@ def parse_trip_request(user_input: str) -> TripQuery:
     """
     Convert free-text user input into structured TripQuery using Gemini.
     """
-
+    
     system_prompt = f"""
     You are a travel assistant that extracts structured JSON from natural language trip requests.
     Always return ONLY valid JSON (no text before or after).
     
     Required keys:
+    - origin (string, e.g., starting city or airport)
     - destination (string)
     - start_date (YYYY-MM-DD if possible)
     - end_date (YYYY-MM-DD if possible)
@@ -58,11 +57,19 @@ def parse_trip_request(user_input: str) -> TripQuery:
     - If the user only specifies a start date or explicitly says "one-way", set trip_type="one-way".
     - If unsure, default to "round-trip".
     """
-
+ 
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content([system_prompt, user_input])
 
     raw_text = response.text.strip()
+    
+    # Strip Markdown code blocks if present
+    if raw_text.startswith("```json"):
+        raw_text = raw_text[7:]  # Remove ```json
+    if raw_text.endswith("```"):
+        raw_text = raw_text[:-3]  # Remove ```
+    raw_text = raw_text.strip()  # Clean whitespace
+    
     try:
         parsed = json.loads(raw_text)
         return TripQuery(**parsed)
@@ -77,4 +84,4 @@ if __name__ == "__main__":
     test_input = "Plan me a one-way flight from Delhi to London on 10th October under ₹60,000."
     result = parse_trip_request(test_input)
     print("✅ Parsed Trip Query:")
-    print(result.json(indent=2))
+    print(result.model_dump_json(indent=2))

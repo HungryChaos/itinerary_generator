@@ -11,4 +11,4 @@ env/
 .streamlit/
 
 # Environment variables
-.env
+multi-agent-ai-system/.env

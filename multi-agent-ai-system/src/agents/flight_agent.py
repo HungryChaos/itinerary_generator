@@ -7,7 +7,16 @@ def search_flights(origin, destination, departure_date, return_date=None, travel
     Agent wrapper for Amadeus flight search.
     Returns cleaned list of flights.
     """
-    raw = search_flights_api(origin, destination, departure_date, return_date, travelers, currency)
+    from services.amadeus_services import get_city_code
+    
+    try:
+        origin_code = get_city_code(origin)
+        destination_code = get_city_code(destination)
+    except ValueError as e:
+        print(f"❌ Error getting city codes: {e}")
+        return []
+    
+    raw = search_flights_api(origin_code, destination_code, departure_date, return_date, travelers, currency)
     offers = raw.get("data", [])
 
     flights = []

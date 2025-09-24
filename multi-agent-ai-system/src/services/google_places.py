@@ -59,3 +59,21 @@ def get_photo_url(photo_reference, max_width=600):
     """
     return f"{BASE_URL}/photo?maxwidth={max_width}&photoreference={photo_reference}&key={GOOGLE_API_KEY}"
 
+# services/google_places.py
+
+def search_hotels(destination, max_results=10):
+    """
+    Wrapper to search hotels in a city using Google Places API.
+    """
+    query = f"hotels in {destination}"
+    places = search_places(query, place_type="lodging")
+    return places[:max_results]
+
+
+def search_attractions(destination, max_results=10):
+    """
+    Wrapper to search attractions in a city using Google Places API.
+    """
+    query = f"tourist attractions in {destination}"
+    places = search_places(query, place_type="tourist_attraction")
+    return places[:max_results]
