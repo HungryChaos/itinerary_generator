@@ -31,6 +31,7 @@ def search_places(query, place_type=None, location=None, radius=5000):
     body = resp.json()
     results = body.get("results", [])
     status = body.get("status")
+    print(f"🔍 Google Places API status: {status} for query '{query}'")
     if status != "OK" and status != "ZERO_RESULTS":
         # Log or raise depending on how you want to handle it
         return []

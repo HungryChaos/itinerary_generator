@@ -81,7 +81,7 @@ def parse_trip_request(user_input: str) -> TripQuery:
 # Test locally
 # --------------------
 if __name__ == "__main__":
-    test_input = "Plan me a one-way flight from Delhi to London on 10th October under ₹60,000."
+    test_input = "Plan me a one-way flight from new york to paris on 10th October under $60,000."
     result = parse_trip_request(test_input)
     print("✅ Parsed Trip Query:")
     print(result.model_dump_json(indent=2))
